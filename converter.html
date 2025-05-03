@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Video Background</title>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .video-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      /* ensure fill full */
+      z-index: -1;
+    }
+
+
+    .text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      text-align: center;
+      font-family: sans-serif;
+      transition: opacity 1s ease;
+    }
+
+    #container {
+      display: flex;
+      opacity: 0;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      transition: opacity 0.8s ease;
+    }
+
+    canvas {
+      margin: auto;
+      /* border: 2px solid black; */
+      background-image: url('https://www.transparenttextures.com/patterns/white-wall-3.png');
+      background-color: #fafafa;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease, visibility 0s linear 0.8s;
+      background-color: #f0f0f0;
+    }
+
+    canvas.show {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.8s ease;
+    }
+
+    .image-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .image-column img {
+      width: 80px;
+      cursor: grab;
+      border: 2px solid transparent;
+    }
+
+    #button {
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+  <!-- bg video -->
+  <video autoplay muted loop class="video-bg">
+    <source src="./video/bkg.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+  </video>
+
+  <!-- bg content -->
+  <div id="container">
+    <div class="image-column" id="left-images">
+      <img src="./images/bamboo.png" draggable="true" />
+      <img src="./images/boat.png" draggable="true" />
+      <img src="./images/cloud.png" draggable="true" />
+    </div>
+    <canvas id="myCanvas" width="500" height="400"></canvas>
+    <div class="image-column" id="right-images">
+      <img src="./images/guzheng.png" draggable="true" />
+      <img src="./images/erhu.png" draggable="true" />
+      <img src="./images/pipa.png" draggable="true" />
+    </div>
+  </div>
+
+  <div id="button" class="d-flex justify-content-center gap-5">
+    <button class="btn btn-primary rounded-pill shadow" id="clear">Clear Canvas</button>
+    <button class="btn btn-primary rounded-pill shadow" id="compose">Compose Music</button>
+  </div>
+
+  <div class="text">
+    <h1>Chinese Painting to Music Converter</h1>
+    <p>Enjoy the Harmony of Chords</p>
+
+  </div>
+  <script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+
+    document.querySelector('.text').addEventListener('mouseover', function () {
+      this.style.opacity = '0';
+      document.querySelector('#container').style.opacity = '1';
+      document.querySelector('#button').style.opacity = '1';
+      canvas.classList.add('show');
+    });
+
+    document.querySelector('#clear').addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); })
+
+    document.querySelectorAll('img[draggable="true"]').forEach(img => {
+      img.addEventListener('dragstart', function (e) {
+        e.dataTransfer.setData('text/plain', img.src);
+      });
+    });
+
+    // 允许放置
+    canvas.addEventListener('dragover', function (e) {
+      e.preventDefault();
+    });
+
+    // 处理放置到 canvas 上
+    canvas.addEventListener('drop', function (e) {
+      e.preventDefault();
+      const src = e.dataTransfer.getData('text/plain');
+      const img = new Image();
+      img.src = src;
+
+
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      img.onload = function () {
+        const targetWidth = 80; // 和 .image-column img 保持一致
+        const scale = targetWidth / img.width;
+        const targetHeight = img.height * scale;
+
+        const drawX = x - targetWidth / 2;
+        const drawY = y - targetHeight / 2;
+        ctx.drawImage(img, drawX, drawY, targetWidth, targetHeight);
+      };
+    });
+
+  </script>
+</body>
+
+</html>
